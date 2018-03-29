@@ -1357,7 +1357,9 @@ class Entity implements ArrayAccess
             return;
         }
 
-        return $this->getRelationValue($key);
+        // TODO: No idea why there is a method call to nowhere
+        // return $this->getRelationValue($key);
+        return null;
     }
 
     /**
