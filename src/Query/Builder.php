@@ -878,9 +878,9 @@ class Builder
         $this->count = true;
         $results = $this->get();
 
-        //return (int) $results;
         if (! $results->isEmpty()) {
-            return (int) $results[0];
+            // replace all none numeric characters before casting it as int
+            return (int) preg_replace('/[^0-9,.]/', '', $results[0]);
         }
     }
 
