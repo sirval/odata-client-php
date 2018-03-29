@@ -259,7 +259,13 @@ class Grammar implements IGrammar
     protected function whereBasic(Builder $query, $where)
     {
         //$value = $this->parameter($where['value']);
-        $value = "'".$where['value']."'";
+        $value = $where['value'];
+
+        // stringify all values if it has NOT an odata enum syntax
+        // (ex. Microsoft.OData.SampleService.Models.TripPin.PersonGender'Female')
+        if (!preg_match("/^([\w]+\.)+([\w]+)(\'[\w]+\')$/", $value)) {
+            $value = "'".$where['value']."'";
+        }
 
         return $where['column'].' '.$this->getOperatorMapping($where['operator']).' '.$value;
     }
