@@ -304,8 +304,13 @@ class Builder
      */
     public function order($properties = [])
     {
-        $order = is_array($properties) ? $properties : func_get_args();
-        $this->orders = $this->buildOrders(array($order));
+        $order = is_array($properties) && count(func_get_args()) === 1 ? $properties : func_get_args();
+
+        if (!(isset($order[0]) && is_array($order[0]))) {
+            $order = array($order);
+        }
+
+        $this->orders = $this->buildOrders($order);
 
         return $this;
     }
@@ -320,21 +325,6 @@ class Builder
     public function orderBySQL($sql = '')
     {
         $this->orders = array(['sql' => $sql]);
-
-        return $this;
-    }
-
-    /**
-     * Set multiple properties to be ordered.
-     *
-     * @param  array|mixed  $properties
-     *
-     * @return $this
-     */
-    public function orders($properties = [])
-    {
-        $orders = isset($properties[0]) && is_array($properties[0]) ? $properties : func_get_args();
-        $this->orders = $this->buildOrders($orders);
 
         return $this;
     }
