@@ -1,15 +1,15 @@
 {
-    "name": "saintsystems/odata-client",
-    "version": "0.1.0",
+    "name": "fouraitch/odata-client",
+    "version": "0.1.1",
     "description": "Saint Systems OData Client for PHP",
     "keywords": ["odata", "rest", "php"],
-    "homepage": "https://github.com/saintsystems/odata-client-php",
+    "homepage": "https://github.com/fouraitch/odata-client-php",
     "license": "MIT",
     "type": "library",
     "authors": [
         {
-            "name": "Saint Systems",
-            "email": "contact@saintsystems.com"
+            "name": "Arthur247",
+            "email": "arth.arth247@gmail.com"
         }
     ],
     "require": {
