@@ -4,6 +4,7 @@ namespace SaintSystems\OData;
 
 use GuzzleHttp\Client;
 use SaintSystems\OData\Exception\ODataException;
+use SaintSystems\OData\Services\ODataContentType;
 
 /**
  * The base request class.
@@ -97,6 +98,7 @@ class ODataRequest implements IODataRequest
         }
         $this->timeout = 0;
         $this->headers = $this->getDefaultHeaders();
+        $this->contentTypeService = new ODataContentType();
     }
 
     /**
@@ -154,16 +156,16 @@ class ODataRequest implements IODataRequest
         // Attach streams & JSON automatically
         if (is_string($obj) || is_a($obj, 'GuzzleHttp\\Psr7\\Stream')) {
             $this->requestBody = $obj;
-        } 
+        }
         // JSON-encode the model object's property dictionary
         else if (method_exists($obj, 'getProperties')) {
             $class = get_class($obj);
             $class = explode("\\", $class);
             $model = strtolower(end($class));
-            
+
             $body = $this->flattenDictionary($obj->getProperties());
             $this->requestBody = "{" . $model . ":" . json_encode($body) . "}";
-        } 
+        }
         // By default, JSON-encode (i.e. arrays)
         else {
             $this->requestBody = json_encode($obj);
@@ -211,7 +213,7 @@ class ODataRequest implements IODataRequest
 
         $request = $this->getHttpRequestMessage();
         $request->body = $this->requestBody;
-        
+
         $this->authenticateRequest($request);
 
         $result = $this->client->getHttpProvider()->send($request);
@@ -228,10 +230,11 @@ class ODataRequest implements IODataRequest
         // Wrap response in ODataResponse layer
         try {
             $response = new ODataResponse(
-                $this, 
-                $result->getBody()->getContents(), 
-                $result->getStatusCode(), 
-                $result->getHeaders()
+                $this,
+                $result->getBody()->getContents(),
+                $result->getStatusCode(),
+                $result->getHeaders(),
+                $this->contentTypeService->getType($result->getHeaders())
             );
         } catch (\Exception $e) {
             throw new ODataException(Constants::UNABLE_TO_PARSE_RESPONSE);
@@ -245,7 +248,7 @@ class ODataRequest implements IODataRequest
         if ($returnType) {
             $returnObj = $response->getResponseAsObject($returnType);
         }
-        return $returnObj; 
+        return $returnObj;
     }
 
     /**
@@ -271,13 +274,14 @@ class ODataRequest implements IODataRequest
                 'timeout' => $this->timeout
             ]
         )->then(
-            // On success, return the result/response
+        // On success, return the result/response
             function ($result) {
                 $response = new ODataResponse(
-                    $this, 
-                    $result->getBody()->getContents(), 
-                    $result->getStatusCode(), 
-                    $result->getHeaders()
+                    $this,
+                    $result->getBody()->getContents(),
+                    $result->getStatusCode(),
+                    $result->getHeaders(),
+                    $this->contentTypeService->getType($result->getHeaders())
                 );
                 $returnObject = $response;
                 if ($this->returnType) {

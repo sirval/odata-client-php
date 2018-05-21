@@ -1,5 +1,5 @@
 <?php
-// test
+
 /**
  * URL constants as defined in the PHP Manual under "Constants usable with
  * http_build_url()".
