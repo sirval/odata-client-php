@@ -8,6 +8,10 @@
     "type": "library",
     "authors": [
         {
+            "name": "Saint Systems",
+            "email": "contact@saintsystems.com"
+        },
+        {
             "name": "Arthur247",
             "email": "arth.arth247@gmail.com"
         }

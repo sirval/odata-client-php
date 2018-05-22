@@ -7,7 +7,7 @@ class ODataXmlResponseProcessor implements IODataResponseProcessor
 {
     /**
      * @param $responseBody
-     * @return array|string
+     * @return array
      */
     public function decodeResponseBody($responseBody)
     {
@@ -16,11 +16,10 @@ class ODataXmlResponseProcessor implements IODataResponseProcessor
 
     /**
      * @param $xml
-     * @return array|string
+     * @return array
      */
     private function xmlToArray($xml)
     {
-
         $doc = new \DOMDocument();
         $doc->loadXML($xml);
         $root = $doc->documentElement;
@@ -32,7 +31,7 @@ class ODataXmlResponseProcessor implements IODataResponseProcessor
 
     /**
      * @param $node
-     * @return array|string
+     * @return array
      */
     private function nodeToArray($node)
     {

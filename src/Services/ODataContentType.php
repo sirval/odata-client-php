@@ -17,13 +17,11 @@ class ODataContentType
      */
     private function getResponseContentType($headers)
     {
-        if (!$headers || !count($headers)) return self::JSON;
+        if (!count($headers)) return self::JSON;
 
-        if (!isset($headers['content-type'])) {
-            $contentType = $headers['Content-Type'][0];
-        } else {
-            $contentType = $headers['content-type'][0];
-        }
+        $headers = array_change_key_case($headers, CASE_LOWER);
+
+        $contentType = $headers['content-type'][0];
 
         if (stripos($contentType, "application/atom+xml") !== false) {
             return self::ATOMPUB_XML;

@@ -8,6 +8,7 @@ namespace SaintSystems\OData;
 interface IODataResponseProcessor {
 
     /**
+     * @param $responseBody
      * @return array
      */
     public function decodeResponseBody($responseBody);
