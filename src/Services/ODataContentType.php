@@ -23,7 +23,7 @@ class ODataContentType
 
         $contentType = $headers['content-type'][0];
 
-        if (stripos($contentType, "application/atom+xml") !== false) {
+        if (stripos($contentType, "application/atom+xml") !== false || stripos($contentType, "application/xml") !== false) {
             return self::ATOMPUB_XML;
         }
         if (stripos($contentType, "application/json") !== false) {
