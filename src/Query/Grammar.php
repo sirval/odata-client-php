@@ -259,7 +259,7 @@ class Grammar implements IGrammar
     protected function whereBasic(Builder $query, $where)
     {
         //$value = $this->parameter($where['value']);
-        $value = "'".$where['value']."'";
+        $value = "guid'".$where['value']."'";
 
         return $where['column'].' '.$this->getOperatorMapping($where['operator']).' '.$value;
     }
