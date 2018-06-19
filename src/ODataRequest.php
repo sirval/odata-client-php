@@ -11,6 +11,8 @@ use SaintSystems\OData\Services\ODataContentType;
  */
 class ODataRequest implements IODataRequest
 {
+    const FULL_RESPONSE = 'FULL_RESPONSE';
+
     /**
      * The URL for the request
      *
@@ -250,7 +252,7 @@ class ODataRequest implements IODataRequest
 
         $returnType = is_null($this->returnType) ? Entity::class : $this->returnType;
 
-        if ($returnType) {
+        if ($returnType && $returnType !== self::FULL_RESPONSE) {
             $returnObj = $response->getResponseAsObject($returnType);
         }
         return $returnObj; 
@@ -289,7 +291,7 @@ class ODataRequest implements IODataRequest
                     $this->contentTypeService->getType($result->getHeaders())
                 );
                 $returnObject = $response;
-                if ($this->returnType) {
+                if ($this->returnType && $this->returnType !== self::FULL_RESPONSE) {
                     $returnObject = $response->getResponseAsObject(
                         $this->returnType
                     );
