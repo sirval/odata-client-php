@@ -630,14 +630,15 @@ class Builder
     }
 
     /**
+     *
      * Execute the query as a "GET" request.
      *
      * @param array $properties
-     * @param array $options
-     *
-     * @return Collection
+     * @param null $options
+     * @param bool $full_response
+     * @return IODataRequest|Collection
      */
-    public function get($properties = [], $options = null)
+    public function get($properties = [], $options = null, $full_response = false)
     {
         if (is_numeric($properties)) {
             $options = $properties;
@@ -661,6 +662,8 @@ class Builder
         $results = $this->processor->processSelect($this, $this->runGet());
 
         $this->properties = $original;
+
+        if ($full_response) return $results;
 
         return collect($results);
         //return $results;
