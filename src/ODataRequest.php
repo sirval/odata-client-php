@@ -4,12 +4,15 @@ namespace SaintSystems\OData;
 
 use GuzzleHttp\Client;
 use SaintSystems\OData\Exception\ODataException;
+use SaintSystems\OData\Services\ODataContentType;
 
 /**
  * The base request class.
  */
 class ODataRequest implements IODataRequest
 {
+    const FULL_RESPONSE = 'FULL_RESPONSE';
+
     /**
      * The URL for the request
      *
@@ -73,6 +76,11 @@ class ODataRequest implements IODataRequest
     private $client;
 
     /**
+     * @var ODataContentType
+     */
+    private $contentTypeService;
+
+    /**
      * Constructs a new ODataRequest object
      * @param string       $method     The HTTP method to use, e.g. "GET" or "POST"
      * @param string       $requestUrl The URL for the OData request
@@ -97,6 +105,7 @@ class ODataRequest implements IODataRequest
         }
         $this->timeout = 0;
         $this->headers = $this->getDefaultHeaders();
+        $this->contentTypeService = new ODataContentType();
     }
 
     /**
@@ -231,7 +240,8 @@ class ODataRequest implements IODataRequest
                 $this,
                 $result->getBody()->getContents(),
                 $result->getStatusCode(),
-                $result->getHeaders()
+                $result->getHeaders(),
+                $this->contentTypeService->getType($result->getHeaders())
             );
         } catch (\Exception $e) {
             throw new ODataException(Constants::UNABLE_TO_PARSE_RESPONSE);
@@ -242,7 +252,7 @@ class ODataRequest implements IODataRequest
 
         $returnType = is_null($this->returnType) ? Entity::class : $this->returnType;
 
-        if ($returnType) {
+        if ($returnType && $returnType !== self::FULL_RESPONSE) {
             $returnObj = $response->getResponseAsObject($returnType);
         }
         return $returnObj;
@@ -277,10 +287,11 @@ class ODataRequest implements IODataRequest
                     $this,
                     $result->getBody()->getContents(),
                     $result->getStatusCode(),
-                    $result->getHeaders()
+                    $result->getHeaders(),
+                    $this->contentTypeService->getType($result->getHeaders())
                 );
                 $returnObject = $response;
-                if ($this->returnType) {
+                if ($this->returnType && $this->returnType !== self::FULL_RESPONSE) {
                     $returnObject = $response->getResponseAsObject(
                         $this->returnType
                     );

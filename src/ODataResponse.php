@@ -56,6 +56,13 @@ class ODataResponse
     private $httpStatusCode;
 
     /**
+     * Odata response type.
+     *
+     * @var IODataResponseProcessor
+     */
+    private $responseContenType;
+
+    /**
     * Creates a new OData HTTP response entity
     *
     * @param object $request        The request
@@ -63,12 +70,18 @@ class ODataResponse
     * @param string $httpStatusCode The returned status code
     * @param array  $headers        The returned headers
     */
-    public function __construct($request, $body = null, $httpStatusCode = null, $headers = array())
+    public function __construct(
+        $request,
+        $body = null,
+        $httpStatusCode = null,
+        $headers = array(),
+        IODataResponseProcessor $responseType)
     {
         $this->request = $request;
         $this->body = $body;
         $this->httpStatusCode = $httpStatusCode;
         $this->headers = $headers;
+        $this->responseContenType = $responseType;
         $this->decodedBody = $this->decodeBody();
     }
 
@@ -79,7 +92,8 @@ class ODataResponse
     */
     private function decodeBody()
     {
-        $decodedBody = json_decode($this->body, true);
+        $decodedBody = $this->responseContenType
+            ->decodeResponseBody($this->body);
         if ($decodedBody === null) {
             $decodedBody = array();
         }
