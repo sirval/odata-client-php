@@ -1,5 +1,5 @@
 {
-    "name": "beloool/odata-client",
+    "name": "beloool/odata-client-php",
     "version": "0.2.7",
     "description": "Saint Systems OData Client for PHP",
     "keywords": ["odata", "rest", "php"],
