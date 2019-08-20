@@ -1,9 +1,9 @@
 {
-    "name": "ovip/odata-client",
+    "name": "beloool/odata-client",
     "version": "0.2.7",
     "description": "Saint Systems OData Client for PHP",
     "keywords": ["odata", "rest", "php"],
-    "homepage": "https://github.com/beloool/odata-client-php""",
+    "homepage": "https://github.com/beloool/odata-client-php",
     "license": "MIT",
     "type": "library",
     "authors": [
