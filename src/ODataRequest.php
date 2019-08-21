@@ -163,16 +163,16 @@ class ODataRequest implements IODataRequest
         // Attach streams & JSON automatically
         if (is_string($obj) || is_a($obj, 'GuzzleHttp\\Psr7\\Stream')) {
             $this->requestBody = $obj;
-        }
+        } 
         // JSON-encode the model object's property dictionary
         else if (method_exists($obj, 'getProperties')) {
             $class = get_class($obj);
             $class = explode("\\", $class);
             $model = strtolower(end($class));
-
+            
             $body = $this->flattenDictionary($obj->getProperties());
             $this->requestBody = "{" . $model . ":" . json_encode($body) . "}";
-        }
+        } 
         // By default, JSON-encode (i.e. arrays)
         else {
             $this->requestBody = json_encode($obj);
@@ -220,7 +220,7 @@ class ODataRequest implements IODataRequest
 
         $request = $this->getHttpRequestMessage();
         $request->body = $this->requestBody;
-
+        
         $this->authenticateRequest($request);
 
         $result = $this->client->getHttpProvider()->send($request);
@@ -230,16 +230,16 @@ class ODataRequest implements IODataRequest
             return $result;
         }
 
-        if (strpos($this->requestUrl, '/$count') !== false) {
+        if (ends_with($this->requestUrl, '/$count')) {
             return $result->getBody()->getContents();
         }
 
         // Wrap response in ODataResponse layer
         try {
             $response = new ODataResponse(
-                $this,
-                $result->getBody()->getContents(),
-                $result->getStatusCode(),
+                $this, 
+                $result->getBody()->getContents(), 
+                $result->getStatusCode(), 
                 $result->getHeaders(),
                 $this->contentTypeService->getType($result->getHeaders())
             );
@@ -255,7 +255,7 @@ class ODataRequest implements IODataRequest
         if ($returnType && $returnType !== self::FULL_RESPONSE) {
             $returnObj = $response->getResponseAsObject($returnType);
         }
-        return $returnObj;
+        return $returnObj; 
     }
 
     /**
@@ -284,9 +284,9 @@ class ODataRequest implements IODataRequest
             // On success, return the result/response
             function ($result) {
                 $response = new ODataResponse(
-                    $this,
-                    $result->getBody()->getContents(),
-                    $result->getStatusCode(),
+                    $this, 
+                    $result->getBody()->getContents(), 
+                    $result->getStatusCode(), 
                     $result->getHeaders(),
                     $this->contentTypeService->getType($result->getHeaders())
                 );

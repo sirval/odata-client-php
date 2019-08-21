@@ -56,10 +56,10 @@ class ODataResponse
     private $httpStatusCode;
 
     /**
-     * Odata response type.
-     *
-     * @var IODataResponseProcessor
-     */
+    * Odata response type.
+    *
+    * @var IODataResponseProcessor
+    */
     private $responseContenType;
 
     /**
@@ -94,6 +94,7 @@ class ODataResponse
     {
         $decodedBody = $this->responseContenType
             ->decodeResponseBody($this->body);
+
         if ($decodedBody === null) {
             $decodedBody = array();
         }

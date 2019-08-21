@@ -38,20 +38,13 @@ class Grammar implements IGrammar
         'queryString',
         'properties',
         'wheres',
-        'expands',
+        //'expand',
         //'search',
         'orders',
         'skip',
         'take',
         'totalCount',
     ];
-
-    /**
-     * Determine if query param is the first one added to uri
-     *
-     * @var bool
-     */
-    private $isFirstQueryParam = true;
 
     /**
      * @inheritdoc
@@ -77,7 +70,7 @@ class Grammar implements IGrammar
         $query->properties = $original;
 
         //dd($uri);
-
+        
         return $uri;
     }
 
@@ -139,12 +132,12 @@ class Grammar implements IGrammar
 
     protected function compileQueryString(Builder $query, $queryString)
     {
-        if (isset($query->entitySet)
+        if (isset($query->entitySet) 
             && (
                 !empty($query->properties)
                 || isset($query->wheres)
                 || isset($query->orders)
-                || isset($query->expands)
+                || isset($query->expand)
                 || isset($query->take)
                 || isset($query->skip)
             )) {
@@ -193,27 +186,10 @@ class Grammar implements IGrammar
 
         $select = '';
         if (! empty($properties)) {
-            $select = $this->appendQueryParam('$select=') . $this->columnize($properties);
+            $select = '$select='.$this->columnize($properties);
         }
-
+        
         return $select;
-    }
-
-    /**
-     * Compile the "expand" portions of the query.
-     *
-     * @param Builder  $query
-     * @param array    $expands
-     *
-     * @return string
-     */
-    protected function compileExpands(Builder $query, $expands)
-    {
-        if (! empty($expands)) {
-            return $this->appendQueryParam('$expand=') . implode(',', $expands);
-        }
-
-        return '';
     }
 
     /**
@@ -267,7 +243,7 @@ class Grammar implements IGrammar
     protected function concatenateWhereClauses($query, $filter)
     {
         //$conjunction = $query instanceof JoinClause ? 'on' : 'where';
-        $conjunction = $this->appendQueryParam('$filter=');
+        $conjunction = '$filter=';
 
         return $conjunction . $this->removeLeadingBoolean(implode(' ', $filter));
     }
@@ -283,22 +259,9 @@ class Grammar implements IGrammar
     protected function whereBasic(Builder $query, $where)
     {
         //$value = $this->parameter($where['value']);
-        $value = $where['value'];
-
-        // stringify all values if it has NOT an odata enum or special syntax primitive data type
-        // (ex. Microsoft.OData.SampleService.Models.TripPin.PersonGender'Female' or datetime'1970-01-01T00:00:00')
-        if (!preg_match("/^([\w]+\.)+([\w]+)(\'[\w]+\')$/", $value) && !$this->isSpecialPrimitiveDataType($value)) {
-            // Check if the value is a string and NOT a date
-            if (is_string($value) && !\DateTime::createFromFormat('Y-m-d\TH:i:sT', $value)) {
-                $value = "'".$where['value']."'";
-            }
-        }
+        $value = "'".$where['value']."'";
 
         return $where['column'].' '.$this->getOperatorMapping($where['operator']).' '.$value;
-    }
-
-    protected function isSpecialPrimitiveDataType($value){
-        return preg_match("/^(binary|datetime|guid|time|datetimeoffset)(\'[\w\:\-\.]+\')$/i", $value);
     }
 
     /**
@@ -312,7 +275,7 @@ class Grammar implements IGrammar
     protected function compileOrders(Builder $query, $orders)
     {
         if (! empty($orders)) {
-            return $this->appendQueryParam('$orderby=') . implode(',', $this->compileOrdersToArray($query, $orders));
+            return '$orderby='.implode(',', $this->compileOrdersToArray($query, $orders));
         }
 
         return '';
@@ -349,7 +312,7 @@ class Grammar implements IGrammar
         if (! empty($query->entityKey)) {
             return '';
         }
-        return $this->appendQueryParam('$top=') . (int) $take;
+        return '$top='.(int) $take;
     }
 
     /**
@@ -362,7 +325,7 @@ class Grammar implements IGrammar
      */
     protected function compileSkip(Builder $query, $skip)
     {
-        return $this->appendQueryParam('$skip=') . (int) $skip;
+        return '$skip='.(int) $skip;
     }
 
     /**
@@ -378,7 +341,7 @@ class Grammar implements IGrammar
         if (isset($query->entityKey)) {
             return '';
         }
-        return $this->appendQueryParam('$count=true');
+        return '$count=true';
     }
 
     /**
@@ -476,9 +439,9 @@ class Grammar implements IGrammar
         // is a join clause query, we need to remove the "on" portion of the SQL and
         // if it is a normal query we need to take the leading "$filter=" of queries.
         // $offset = $query instanceof JoinClause ? 3 : 6;
-        $wheres = $this->compileWheres($where['query']);
-        $offset = (substr($wheres, 0, 1) === '&') ? 9 : 8;
-        return '('.substr($wheres, $offset).')';
+        $offset = 8;
+
+        return '('.substr($this->compileWheres($where['query']), $offset).')';
     }
 
     /**
@@ -491,30 +454,5 @@ class Grammar implements IGrammar
     protected function whereNull(Builder $query, $where)
     {
         return $where['column'] . ' eq null';
-    }
-
-    /**
-     * Compile a "where not null" clause.
-     *
-     * @param  Builder  $query
-     * @param  array  $where
-     * @return string
-     */
-    protected function whereNotNull(Builder $query, $where)
-    {
-        return $where['column'] . ' ne null';
-    }
-
-    /**
-     * Append query param to existing uri
-     *
-     * @param string $value
-     * @return mixed
-     */
-    private function appendQueryParam(string $value)
-    {
-        $param = $this->isFirstQueryParam ? $value : '&' . $value;
-        $this->isFirstQueryParam = false;
-        return $param;
     }
 }

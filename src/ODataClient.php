@@ -13,7 +13,7 @@ use SaintSystems\OData\Query\Processor;
 class ODataClient implements IODataClient
 {
     /**
-     * The base service URL. For example, "https://services.odata.org/V4/TripPinService/"
+     * The base service URL. For example, "http://services.odata.org/V4/TripPinService/"
      * @var string
      */
     private $baseUrl;
@@ -143,11 +143,12 @@ class ODataClient implements IODataClient
      */
     public function setBaseUrl($value)
     {
-        if (empty($value)) {
+        if (empty($value))
+        {
             throw new ODataException(Constants::BASE_URL_MISSING);
         }
 
-        $this->baseUrl = rtrim($value, '/') . '/';
+        $this->baseUrl = rtrim($value, '/').'/';
     }
 
     /**
@@ -267,14 +268,10 @@ class ODataClient implements IODataClient
         if ($body) {
             $request->attachBody($body);
         }
-
-        // TODO: find a better solution for this
-        /*
         if ($method === 'PATCH' || $method === 'DELETE') {
+            // TODO: find a better solution for this
             $request->addHeaders(array('If-Match' => '*'));
         }
-         */
-
         return $request->execute();
     }
 

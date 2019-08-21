@@ -17,7 +17,7 @@ class HttpMethod extends Enum
     const GET = 'GET';
 
     /**
-     * Represents an HTTP HEAD protocol method. The HEAD method is identical to GET except that
+     * Represents an HTTP HEAD protocol method. The HEAD method is identical to GET except that 
      * the server only returns message-headers in the response, without a message-body.
      */
     const HEAD = 'HEAD';
@@ -26,7 +26,7 @@ class HttpMethod extends Enum
      * An HTTP method.
      */
     // const METHOD;
-
+    
     /**
      * Represents an HTTP OPTIONS protocol method.
      */
