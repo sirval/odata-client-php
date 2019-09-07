@@ -141,6 +141,11 @@ class Builder
     public $select = [];
 
     /**
+     * @var array
+     */
+    public $expands;
+
+    /**
      * @var IProcessor
      */
     private $processor;
@@ -149,11 +154,6 @@ class Builder
      * @var IGrammar
      */
     private $grammar;
-
-    /**
-     * @var array
-     */
-    private $expands;
 
     /**
      * Create a new query builder instance.
@@ -233,16 +233,19 @@ class Builder
     /**
      * Add an $expand clause to the query.
      *
-     * @param string $property
-     * @param string $first
-     * @param string $operator
-     * @param string $second
-     * @param string $type
-     * @param bool   $ref
-     * @param bool   $count
-     *
+     * @param array $properties
      * @return $this
      */
+    public function expand($properties = [])
+    {
+        $this->expands = is_array($properties) ? $properties : func_get_args();
+
+        return $this;
+    }
+
+    /*
+     * TODO: do we still need this? lots of bugs in here!!!
+     *
     public function expand($property, $first, $operator = null, $second = null, $type = 'inner', $ref = false, $count = false)
     {
         //TODO: need to flush out this method as it will work much like the where and join methods
@@ -272,6 +275,7 @@ class Builder
 
         return $this;
     }
+    */
 
     /**
      * Apply the callback's query changes if the given "value" is true.
@@ -293,6 +297,64 @@ class Builder
         }
 
         return $builder;
+    }
+
+    /**
+     * Set the properties to be ordered.
+     *
+     * @param  array|mixed  $properties
+     *
+     * @return $this
+     */
+    public function order($properties = [])
+    {
+        $order = is_array($properties) && count(func_get_args()) === 1 ? $properties : func_get_args();
+
+        if (!(isset($order[0]) && is_array($order[0]))) {
+            $order = array($order);
+        }
+
+        $this->orders = $this->buildOrders($order);
+
+        return $this;
+    }
+
+    /**
+     * Set the sql property to be ordered.
+     *
+     * @param string $sql
+     *
+     * @return $this
+     */
+    public function orderBySQL($sql = '')
+    {
+        $this->orders = array(['sql' => $sql]);
+
+        return $this;
+    }
+
+    /**
+     * Reformat array to match grammar structure
+     *
+     * @param array $orders
+     *
+     * @return array
+     */
+    private function buildOrders($orders = [])
+    {
+        $_orders = [];
+
+        foreach ($orders as &$order) {
+            $column = isset($order['column']) ? $order['column'] : $order[0];
+            $direction = isset($order['direction']) ? $order['direction'] : (isset($order[1]) ? $order[1] : 'asc');
+
+            array_push($_orders, [
+                'column' => $column,
+                'direction' => $direction
+            ]);
+        }
+
+        return $_orders;
     }
 
     /**
@@ -756,6 +818,92 @@ class Builder
     }
 
     /**
+     * Execute the query as a "POST" request.
+     *
+     * @param array $body
+     * @param array $properties
+     * @param array $options
+     *
+     * @return Collection
+     */
+    public function post($body = [], $properties = [], $options = null)
+    {
+        if (is_numeric($properties)) {
+            $options = $properties;
+            $properties = [];
+        }
+
+        if (isset($options)) {
+            $include_count = $options & QueryOptions::INCLUDE_COUNT;
+
+            if ($include_count) {
+                $this->totalCount = true;
+            }
+        }
+
+        $original = $this->properties;
+
+        if (is_null($original)) {
+            $this->properties = $properties;
+        }
+
+        $results = $this->processor->processSelect($this, $this->runPost($body));
+
+        $this->properties = $original;
+
+        return collect($results);
+    }
+
+    /**
+     * Execute the query as a "DELETE" request.
+     *
+     * @return boolean
+     */
+    public function delete($options = null)
+    {
+        $results = $this->processor->processSelect($this, $this->runDelete());
+
+        return true;
+    }
+
+    /**
+     * Execute the query as a "PATCH" request.
+     *
+     * @param array $properties
+     * @param array $options
+     *
+     * @return Collection
+     */
+    public function patch($body, $properties = [], $options = null)
+    {
+        if (is_numeric($properties)) {
+            $options = $properties;
+            $properties = [];
+        }
+
+        if (isset($options)) {
+            $include_count = $options & QueryOptions::INCLUDE_COUNT;
+
+            if ($include_count) {
+                $this->totalCount = true;
+            }
+        }
+
+        $original = $this->properties;
+
+        if (is_null($original)) {
+            $this->properties = $properties;
+        }
+
+        $results = $this->processor->processSelect($this, $this->runPatch($body));
+
+        $this->properties = $original;
+
+        return collect($results);
+        //return $results;
+    }
+
+    /**
      * Run the query as a "GET" request against the client.
      *
      * @return IODataRequest
@@ -813,9 +961,9 @@ class Builder
         $this->count = true;
         $results = $this->get();
 
-        //return (int) $results;
         if (! $results->isEmpty()) {
-            return (int) $results[0];
+            // replace all none numeric characters before casting it as int
+            return (int) preg_replace('/[^0-9,.]/', '', $results[0]);
         }
     }
 

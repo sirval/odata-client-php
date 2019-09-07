@@ -230,7 +230,7 @@ class ODataRequest implements IODataRequest
             return $result;
         }
 
-        if (ends_with($this->requestUrl, '/$count')) {
+        if (strpos($this->requestUrl, '/$count') !== false) {
             return $result->getBody()->getContents();
         }
 

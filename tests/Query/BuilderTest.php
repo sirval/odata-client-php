@@ -440,7 +440,7 @@ class BuilderTest extends TestCase
         $entitySet = 'People';
 
         $builder->from($entitySet)
-                ->whereNull('FirstName');
+            ->whereNull('FirstName');
 
         $expectedUri = 'People?$filter=FirstName eq null';
         $actualUri = $builder->toRequest();
@@ -455,7 +455,7 @@ class BuilderTest extends TestCase
         $entitySet = 'People';
 
         $builder->from($entitySet)
-                ->whereNotNull('FirstName');
+            ->whereNotNull('FirstName');
 
         $expectedUri = 'People?$filter=FirstName ne null';
         $actualUri = $builder->toRequest();
@@ -470,7 +470,7 @@ class BuilderTest extends TestCase
         $entitySet = 'People';
 
         $builder->from($entitySet)
-                ->where('FirstName', 'Russell');
+            ->where('FirstName', 'Russell');
 
         $expectedUri = 'People?$filter=FirstName eq \'Russell\'';
         $actualUri = $builder->toRequest();
@@ -485,7 +485,7 @@ class BuilderTest extends TestCase
         $entitySet = 'Photos';
 
         $builder->from($entitySet)
-                ->where('Id', 1);
+            ->where('Id', 1);
 
         $expectedUri = 'Photos?$filter=Id eq 1';
         $actualUri = $builder->toRequest();

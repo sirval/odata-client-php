@@ -269,7 +269,9 @@ class ODataClient implements IODataClient
         $requestUri = str_replace($remove, "", $this->baseUrl . $requestUri);
 
         $request = new ODataRequest($method, $requestUri, $this, $this->entityReturnType);
-        
+        if ($body) {
+            $request->attachBody($body);
+        }
         if ($body) {
             $request->attachBody($body);
         }
