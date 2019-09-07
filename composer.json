@@ -1,10 +1,8 @@
 {
-    "name": "beloool/odata-client",
     "name": "elemes1/odata-client",
     "version": "0.2.7",
     "description": "Saint Systems OData Client for PHP",
     "keywords": ["odata", "rest", "php"],
-    "homepage": "https://github.com/beloool/odata-client",
     "homepage": "https://github.com/elemes1/odata-client",
     "license": "MIT",
     "type": "library",
@@ -19,17 +17,15 @@
         }
     ],
     "require": {
-        "guzzlehttp/guzzle": "^6.2",
         "guzzlehttp/guzzle": "^6.3",
         "monolog/monolog": "^1.22",
         "nesbot/carbon": "^1.22",
-        "illuminate/support": "^5.4"
         "illuminate/support": "^5.4",
         "symfony/translation": "^4.2",
         "symfony/validator": "^4.2"
     },
     "require-dev": {
-        "phpdocumentor/phpdocumentor": "^2.9"
+        "phpunit/phpunit": "^7"
     },
     "autoload": {
         "files": [
