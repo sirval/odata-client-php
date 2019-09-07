@@ -4,12 +4,15 @@ namespace SaintSystems\OData;
 
 use GuzzleHttp\Client;
 use SaintSystems\OData\Exception\ODataException;
+use SaintSystems\OData\Services\ODataContentType;
 
 /**
  * The base request class.
  */
 class ODataRequest implements IODataRequest
 {
+    const FULL_RESPONSE = 'FULL_RESPONSE';
+
     /**
      * The URL for the request
      *
@@ -73,6 +76,11 @@ class ODataRequest implements IODataRequest
     private $client;
 
     /**
+     * @var ODataContentType
+     */
+    private $contentTypeService;
+
+    /**
      * Constructs a new ODataRequest object
      * @param string       $method     The HTTP method to use, e.g. "GET" or "POST"
      * @param string       $requestUrl The URL for the OData request
@@ -97,6 +105,7 @@ class ODataRequest implements IODataRequest
         }
         $this->timeout = 0;
         $this->headers = $this->getDefaultHeaders();
+        $this->contentTypeService = new ODataContentType();
     }
 
     /**
@@ -154,16 +163,16 @@ class ODataRequest implements IODataRequest
         // Attach streams & JSON automatically
         if (is_string($obj) || is_a($obj, 'GuzzleHttp\\Psr7\\Stream')) {
             $this->requestBody = $obj;
-        }
+        } 
         // JSON-encode the model object's property dictionary
         else if (method_exists($obj, 'getProperties')) {
             $class = get_class($obj);
             $class = explode("\\", $class);
             $model = strtolower(end($class));
-
+            
             $body = $this->flattenDictionary($obj->getProperties());
             $this->requestBody = "{" . $model . ":" . json_encode($body) . "}";
-        }
+        } 
         // By default, JSON-encode (i.e. arrays)
         else {
             $this->requestBody = json_encode($obj);
@@ -211,7 +220,7 @@ class ODataRequest implements IODataRequest
 
         $request = $this->getHttpRequestMessage();
         $request->body = $this->requestBody;
-
+        
         $this->authenticateRequest($request);
 
         $result = $this->client->getHttpProvider()->send($request);
@@ -221,17 +230,18 @@ class ODataRequest implements IODataRequest
             return $result;
         }
 
-        if (strpos($this->requestUrl, '/$count') !== false) {
+        if (ends_with($this->requestUrl, '/$count')) {
             return $result->getBody()->getContents();
         }
 
         // Wrap response in ODataResponse layer
         try {
             $response = new ODataResponse(
-                $this,
-                $result->getBody()->getContents(),
-                $result->getStatusCode(),
-                $result->getHeaders()
+                $this, 
+                $result->getBody()->getContents(), 
+                $result->getStatusCode(), 
+                $result->getHeaders(),
+                $this->contentTypeService->getType($result->getHeaders())
             );
         } catch (\Exception $e) {
             throw new ODataException(Constants::UNABLE_TO_PARSE_RESPONSE);
@@ -242,10 +252,10 @@ class ODataRequest implements IODataRequest
 
         $returnType = is_null($this->returnType) ? Entity::class : $this->returnType;
 
-        if ($returnType) {
+        if ($returnType && $returnType !== self::FULL_RESPONSE) {
             $returnObj = $response->getResponseAsObject($returnType);
         }
-        return $returnObj;
+        return $returnObj; 
     }
 
     /**
@@ -274,13 +284,14 @@ class ODataRequest implements IODataRequest
             // On success, return the result/response
             function ($result) {
                 $response = new ODataResponse(
-                    $this,
-                    $result->getBody()->getContents(),
-                    $result->getStatusCode(),
-                    $result->getHeaders()
+                    $this, 
+                    $result->getBody()->getContents(), 
+                    $result->getStatusCode(), 
+                    $result->getHeaders(),
+                    $this->contentTypeService->getType($result->getHeaders())
                 );
                 $returnObject = $response;
-                if ($this->returnType) {
+                if ($this->returnType && $this->returnType !== self::FULL_RESPONSE) {
                     $returnObject = $response->getResponseAsObject(
                         $this->returnType
                     );

@@ -71,7 +71,7 @@ class Builder
     public $count;
 
     /**
-     * Whether to include a total count of items matching
+     * Whether to include a total count of items matching 
      * the request be returned along with the result
      *
      * @var boolean
@@ -141,11 +141,6 @@ class Builder
     public $select = [];
 
     /**
-     * @var array
-     */
-    public $expands;
-
-    /**
      * @var IProcessor
      */
     private $processor;
@@ -154,6 +149,11 @@ class Builder
      * @var IGrammar
      */
     private $grammar;
+
+    /**
+     * @var array
+     */
+    private $expands;
 
     /**
      * Create a new query builder instance.
@@ -233,19 +233,16 @@ class Builder
     /**
      * Add an $expand clause to the query.
      *
-     * @param array $properties
+     * @param string $property
+     * @param string $first
+     * @param string $operator
+     * @param string $second
+     * @param string $type
+     * @param bool   $ref
+     * @param bool   $count
+     *
      * @return $this
      */
-    public function expand($properties = [])
-    {
-        $this->expands = is_array($properties) ? $properties : func_get_args();
-
-        return $this;
-    }
-
-    /*
-     * TODO: do we still need this? lots of bugs in here!!!
-     *
     public function expand($property, $first, $operator = null, $second = null, $type = 'inner', $ref = false, $count = false)
     {
         //TODO: need to flush out this method as it will work much like the where and join methods
@@ -275,7 +272,6 @@ class Builder
 
         return $this;
     }
-    */
 
     /**
      * Apply the callback's query changes if the given "value" is true.
@@ -297,64 +293,6 @@ class Builder
         }
 
         return $builder;
-    }
-
-    /**
-     * Set the properties to be ordered.
-     *
-     * @param  array|mixed  $properties
-     *
-     * @return $this
-     */
-    public function order($properties = [])
-    {
-        $order = is_array($properties) && count(func_get_args()) === 1 ? $properties : func_get_args();
-
-        if (!(isset($order[0]) && is_array($order[0]))) {
-            $order = array($order);
-        }
-
-        $this->orders = $this->buildOrders($order);
-
-        return $this;
-    }
-
-    /**
-     * Set the sql property to be ordered.
-     *
-     * @param string $sql
-     *
-     * @return $this
-     */
-    public function orderBySQL($sql = '')
-    {
-        $this->orders = array(['sql' => $sql]);
-
-        return $this;
-    }
-
-    /**
-     * Reformat array to match grammar structure
-     *
-     * @param array $orders
-     *
-     * @return array
-     */
-    private function buildOrders($orders = [])
-    {
-        $_orders = [];
-
-        foreach ($orders as &$order) {
-            $column = isset($order['column']) ? $order['column'] : $order[0];
-            $direction = isset($order['direction']) ? $order['direction'] : (isset($order[1]) ? $order[1] : 'asc');
-
-            array_push($_orders, [
-                'column' => $column,
-                'direction' => $direction
-            ]);
-        }
-
-        return $_orders;
     }
 
     /**
@@ -611,57 +549,6 @@ class Builder
     }
 
     /**
-     * Add a "where null" clause to the query.
-     *
-     * @param  string  $column
-     * @param  string  $boolean
-     * @param  bool    $not
-     * @return $this
-     */
-    public function whereNull($column, $boolean = 'and', $not = false)
-    {
-        $type = $not ? 'NotNull' : 'Null';
-
-        $this->wheres[] = compact('type', 'column', 'boolean');
-
-        return $this;
-    }
-
-    /**
-     * Add an "or where null" clause to the query.
-     *
-     * @param  string  $column
-     * @return Builder|static
-     */
-    public function orWhereNull($column)
-    {
-        return $this->whereNull($column, 'or');
-    }
-
-    /**
-     * Add a "where not null" clause to the query.
-     *
-     * @param  string  $column
-     * @param  string  $boolean
-     * @return Builder|static
-     */
-    public function whereNotNull($column, $boolean = 'and')
-    {
-        return $this->whereNull($column, $boolean, true);
-    }
-
-    /**
-     * Add an "or where not null" clause to the query.
-     *
-     * @param  string  $column
-     * @return Builder|static
-     */
-    public function orWhereNotNull($column)
-    {
-        return $this->whereNotNull($column, 'or');
-    }
-
-    /**
      * Get the HTTP Request representation of the query.
      *
      * @return string
@@ -743,14 +630,15 @@ class Builder
     }
 
     /**
+     *
      * Execute the query as a "GET" request.
      *
      * @param array $properties
-     * @param array $options
-     *
-     * @return Collection
+     * @param null $options
+     * @param bool $full_response
+     * @return IODataRequest|Collection
      */
-    public function get($properties = [], $options = null)
+    public function get($properties = [], $options = null, $full_response = false)
     {
         if (is_numeric($properties)) {
             $options = $properties;
@@ -774,6 +662,8 @@ class Builder
         $results = $this->processor->processSelect($this, $this->runGet());
 
         $this->properties = $original;
+
+        if ($full_response) return $results;
 
         return collect($results);
         //return $results;
@@ -923,9 +813,9 @@ class Builder
         $this->count = true;
         $results = $this->get();
 
+        //return (int) $results;
         if (! $results->isEmpty()) {
-            // replace all none numeric characters before casting it as int
-            return (int) preg_replace('/[^0-9,.]/', '', $results[0]);
+            return (int) $results[0];
         }
     }
 
@@ -1051,4 +941,21 @@ class Builder
     {
         return $this->client;
     }
+
+
+    /**
+     * Add a "where null" clause to the query.
+     *
+     * @param  string  $column
+     * @param  string  $boolean
+     * @param  bool    $not
+     * @return $this
+     */
+    public function whereNull($column, $boolean = 'and', $not = false)
+    {
+        $type = $not ? 'NotNull' : 'Null';
+        $this->wheres[] = compact('type', 'column', 'boolean');
+        return $this;
+    }
+
 }
