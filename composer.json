@@ -17,10 +17,10 @@
         }
     ],
     "require": {
-        "guzzlehttp/guzzle": "^6.3",
-        "monolog/monolog": "^1.22",
-        "nesbot/carbon": "^1.22",
+        "php": ">=7.1",
+        "guzzlehttp/guzzle": "^6.2",
         "illuminate/support": "^5.4",
+        "nesbot/carbon": "^2.14",
         "symfony/translation": "^4.2",
         "symfony/validator": "^4.2"
     },
