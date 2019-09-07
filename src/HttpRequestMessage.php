@@ -24,7 +24,7 @@ class HttpRequestMessage
 
     /**
      * Gets or sets the HTTP method used by the HTTP request message.
-     * @var HttpMethod
+     * @var string
      */
     public $method;
 
@@ -48,7 +48,7 @@ class HttpRequestMessage
 
     public function __construct(HttpMethod $method = HttpMethod::GET, $requestUri = null)
     {
-        $this->method = $method;
+        $this->method = (string) $method;
         $this->requestUri = $requestUri;
         $this->headers = [];
         $this->returnsStream = false;
