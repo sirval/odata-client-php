@@ -46,7 +46,7 @@ class HttpRequestMessage
      */
     public $version;
 
-    public function __construct(HttpMethod $method = HttpMethod::GET, $requestUri = null)
+    public function __construct($method = HttpMethod::GET, $requestUri = null)
     {
         $this->method = (string) $method;
         $this->requestUri = $requestUri;

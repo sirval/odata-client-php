@@ -17,7 +17,7 @@ class BuilderTest extends TestCase
 
     public function setUp()
     {
-        $this->baseUrl = 'https://services.odata.org/V4/TripPinService';
+        $this->baseUrl = 'http://services.odata.org/V4/TripPinService';
         $this->client = new ODataClient($this->baseUrl);
     }
 

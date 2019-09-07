@@ -7,17 +7,17 @@ use GuzzleHttp\Client;
 class GuzzleHttpProvider implements IHttpProvider
 {
     /**
-    * The Guzzle client used to make the HTTP request
-    *
-    * @var Client
-    */
+     * The Guzzle client used to make the HTTP request
+     *
+     * @var Client
+     */
     protected $http;
 
     /**
-    * The timeout, in seconds
-    *
-    * @var string
-    */
+     * The timeout, in seconds
+     *
+     * @var string
+     */
     protected $timeout;
 
     /**
@@ -42,7 +42,7 @@ class GuzzleHttpProvider implements IHttpProvider
      * Sets the timeout limit of the cURL request
      *
      * @param integer $timeout The timeout in ms
-     * 
+     *
      * @return $this
      */
     public function setTimeout($timeout)
@@ -52,32 +52,30 @@ class GuzzleHttpProvider implements IHttpProvider
     }
 
     /**
-    * Executes the HTTP request using Guzzle
-    *
-    * @param HttpRequestMessage $request
-    *
-    * @return mixed object or array of objects
-    *         of class $returnType
-    */
+     * Executes the HTTP request using Guzzle
+     *
+     * @param HttpRequestMessage $request
+     *
+     * @return mixed object or array of objects
+     *         of class $returnType
+     */
     public function send(HttpRequestMessage $request)
-    {    
+    {
         $options = [
             'headers' => $request->headers,
-            'stream' =>  $request->returnsStream,
+            'stream' => $request->returnsStream,
             'timeout' => $this->timeout,
+            'auth' => $request->auth,
         ];
 
         if ($request->method == HttpMethod::POST || $request->method == HttpMethod::PUT || $request->method == HttpMethod::PATCH) {
             $options['body'] = $request->body;
         }
-        
-        $result = $this->http->request(
-            $request->method, 
-            $request->requestUri, 
+
+        return $this->http->request(
+            $request->method,
+            $request->requestUri,
             $options
         );
-
-        return $result;
     }
-
 }

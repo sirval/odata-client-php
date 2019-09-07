@@ -647,7 +647,7 @@ class Entity implements ArrayAccess
         // If the key is in the "fillable" array, we can of course assume that it's
         // a fillable attribute. Otherwise, we will check the guarded array when
         // we need to determine if the attribute is black-listed on the model.
-        if (in_array($key, $this->getFillable())) {
+        if (in_array($key, $this->getFillable(), true)) {
             return true;
         }
 
@@ -666,7 +666,7 @@ class Entity implements ArrayAccess
      */
     public function isGuarded($key)
     {
-        return in_array($key, $this->getGuarded()) || $this->getGuarded() == ['*'];
+        return in_array($key, $this->getGuarded(), true) || $this->getGuarded() == ['*'];
     }
 
     /**
@@ -964,7 +964,7 @@ class Entity implements ArrayAccess
         // If an attribute is listed as a "date", we'll convert it from a DateTime
         // instance into a form proper for storage on the database tables using
         // the connection grammar's date format. We will auto set the values.
-        elseif ($value && (in_array($key, $this->getDates()) || $this->isDateCastable($key))) {
+        elseif ($value && (in_array($key, $this->getDates(), true) || $this->isDateCastable($key))) {
             $value = $this->fromDateTime($value);
         }
 
@@ -1211,7 +1211,7 @@ class Entity implements ArrayAccess
         // will not perform the cast on those properties to avoid any confusion.
         foreach ($this->getCasts() as $key => $value) {
             if (! array_key_exists($key, $properties) ||
-                in_array($key, $mutatedProperties)) {
+                in_array($key, $mutatedProperties, true)) {
                 continue;
             }
 
@@ -1389,7 +1389,7 @@ class Entity implements ArrayAccess
         // If the property is listed as a date, we will convert it to a DateTime
         // instance on retrieval, which makes it quite convenient to work with
         // date fields without having to create a mutator for each property.
-        if (in_array($key, $this->getDates()) && ! is_null($value)) {
+        if (in_array($key, $this->getDates(), true) && ! is_null($value)) {
             return $this->asDateTime($value);
         }
 
