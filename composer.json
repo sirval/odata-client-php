@@ -1,5 +1,5 @@
 {
-    "name": "elemes1/odata-client",
+    "name": "sirval/odata-client",
     "version": "0.2.7",
     "description": "Saint Systems OData Client for PHP",
     "keywords": ["odata", "rest", "php"],
@@ -14,6 +14,10 @@
         {
             "name": "elemes11",
             "email": "elemes11@gmail.com"
+        },
+        {
+            "name": "sirval",
+            "email": "ohukaiv@gmail.com"
         }
     ],
     "require": {
