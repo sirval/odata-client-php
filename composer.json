@@ -22,7 +22,7 @@
     ],
     "require": {
         "php": ">=7.1",
-        "guzzlehttp/guzzle": "^6.2",
+        "guzzlehttp/guzzle": "^6.2||^7.5.0",
         "illuminate/support": "^5.4",
         "nesbot/carbon": "^2.14",
         "symfony/translation": "^4.2",
